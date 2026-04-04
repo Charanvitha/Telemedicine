@@ -1,5 +1,5 @@
 # Telemedicine Platform
-http://localhost:5173/
+Demo link: https://telemedicine-web-phi.vercel.app/ 
 
 Full-stack telemedicine platform with React, Tailwind CSS, Express, MongoDB, Socket.IO, Multer, and PDFKit.
 
