@@ -1,5 +1,5 @@
 # Telemedicine Platform
-Demo link: https://telemedicine-web-phi.vercel.app/ 
+Demo link: https://telemedicine-e614.vercel.app/
 
 Full-stack telemedicine platform with React, Tailwind CSS, Express, MongoDB, Socket.IO, Multer, and PDFKit.
 
