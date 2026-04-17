@@ -3,7 +3,9 @@ import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 
-const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const socketUrl =
+  import.meta.env.VITE_SOCKET_URL ||
+  (import.meta.env.PROD ? window.location.origin : "http://localhost:5001");
 
 const VideoConsultationPage = () => {
   const { roomId } = useParams();

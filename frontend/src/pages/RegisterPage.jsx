@@ -2,6 +2,30 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const getApiErrorMessage = (apiError) => {
+  if (apiError.response?.data?.message) {
+    return apiError.response.data.message;
+  }
+
+  if (typeof apiError.response?.data === "string" && apiError.response.data.trim()) {
+    return `Request failed (${apiError.response.status}): ${apiError.response.data.slice(0, 120)}`;
+  }
+
+  if (Array.isArray(apiError.response?.data?.errors) && apiError.response.data.errors.length > 0) {
+    return apiError.response.data.errors[0].msg;
+  }
+
+  if (apiError.response?.status) {
+    return `Request failed with status ${apiError.response.status}`;
+  }
+
+  if (apiError.code === "ERR_NETWORK") {
+    return "Unable to reach the server. Please confirm the backend is running.";
+  }
+
+  return "Registration failed";
+};
+
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { register, loading } = useAuth();
@@ -17,17 +41,26 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState("");
 
+  const updateField = (key, value) => {
+    setForm((current) => ({ ...current, [key]: value }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       setError("");
       await register({
         ...form,
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+        specialization: form.specialization.trim(),
+        bio: form.bio.trim(),
         experience: form.experience ? Number(form.experience) : undefined
       });
       navigate("/dashboard");
     } catch (apiError) {
-      setError(apiError.response?.data?.message || "Registration failed");
+      setError(getApiErrorMessage(apiError));
     }
   };
 
@@ -36,59 +69,69 @@ const RegisterPage = () => {
       <h1 className="text-3xl font-semibold text-white">Create account</h1>
       <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
         <input
-          className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3"
+          className="auth-field"
+          autoComplete="name"
           placeholder="Full name"
+          required
           value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          onChange={(e) => updateField("name", e.target.value)}
         />
         <input
-          className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3"
+          className="auth-field"
+          autoComplete="email"
           placeholder="Email"
+          required
           type="email"
           value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          onChange={(e) => updateField("email", e.target.value)}
         />
         <input
-          className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3"
+          className="auth-field"
+          autoComplete="new-password"
+          minLength={6}
           placeholder="Password"
+          required
           type="password"
           value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          onChange={(e) => updateField("password", e.target.value)}
         />
         <select
-          className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3"
+          className="auth-field"
           value={form.role}
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
+          onChange={(e) => updateField("role", e.target.value)}
         >
           <option value="patient">Patient</option>
           <option value="doctor">Doctor</option>
         </select>
         <input
-          className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3"
+          className={`auth-field ${form.role === "patient" ? "md:col-span-2" : ""}`}
+          autoComplete="tel"
           placeholder="Phone"
           value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          onChange={(e) => updateField("phone", e.target.value)}
         />
         {form.role === "doctor" ? (
           <>
             <input
-              className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3"
+              className="auth-field"
               placeholder="Specialization"
               value={form.specialization}
-              onChange={(e) => setForm({ ...form, specialization: e.target.value })}
+              onChange={(e) => updateField("specialization", e.target.value)}
             />
             <input
-              className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3"
+              className="auth-field"
+              min="0"
+              type="number"
               placeholder="Experience (years)"
               value={form.experience}
-              onChange={(e) => setForm({ ...form, experience: e.target.value })}
+              onChange={(e) => updateField("experience", e.target.value)}
             />
             <textarea
-              className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 md:col-span-2"
+              className="auth-field md:col-span-2"
               placeholder="Doctor bio"
               rows="4"
               value={form.bio}
-              onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              onChange={(e) => updateField("bio", e.target.value)}
             />
           </>
         ) : null}

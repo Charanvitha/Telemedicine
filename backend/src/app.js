@@ -15,6 +15,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
 const app = express();
+const apiRouter = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -36,17 +37,20 @@ app.get("/", (_req, res) => {
   res.send("API Running...");
 });
 
-app.get("/api/health", (_req, res) => {
+apiRouter.get("/health", (_req, res) => {
   res.json({ success: true, message: "Telemedicine API is healthy" });
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/appointments", appointmentRoutes);
-app.use("/api/availability", availabilityRoutes);
-app.use("/api/prescriptions", prescriptionRoutes);
-app.use("/api/records", recordRoutes);
-app.use("/api/admin", adminRoutes);
+apiRouter.use("/auth", authRoutes);
+apiRouter.use("/users", userRoutes);
+apiRouter.use("/appointments", appointmentRoutes);
+apiRouter.use("/availability", availabilityRoutes);
+apiRouter.use("/prescriptions", prescriptionRoutes);
+apiRouter.use("/records", recordRoutes);
+apiRouter.use("/admin", adminRoutes);
+
+app.use(apiRouter);
+app.use("/api", apiRouter);
 
 app.use(notFound);
 app.use(errorHandler);
